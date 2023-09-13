@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -21,6 +22,9 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// set by goreleaser
+var version = "(devel)"
+
 const (
 	debugServiceName = "debug-service"
 	debugPortName    = "http"
@@ -32,7 +36,9 @@ type Context struct {
 
 type CLI struct {
 	Kubeconfig string `name:"kubeconfig"`
-	Namespace  string `name:"namespace" short:"n"`
+	Namespace  string `name:"namespace" short:"n" help:"specific namespace or else all namespaces if empty"`
+
+	Version kong.VersionFlag `name:"version" help:"Print version information and quit"`
 }
 
 func kubeconfig(kubeconfigPath string) (string, error) {
@@ -156,10 +162,23 @@ func advertiseMacHack(names []string, ip string) error {
 	return nil
 }
 
+func getVersion() string {
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		if v := bi.Main.Version; v != "" && v != "(devel)" {
+			return v
+		}
+	}
+	// otherwise fallback to the version set by goreleaser
+	return version
+}
+
 func main() {
 	var cli CLI
 	ctx := kong.Parse(&cli,
 		kong.UsageOnError(),
+		kong.Vars{
+			"version": getVersion(),
+		},
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
 			Summary: true,
