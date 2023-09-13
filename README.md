@@ -4,6 +4,20 @@ Export .local ingress hostnames via mDNS
 
 Designed to be used with https://k3d.io/v5.6.0/ or other local kuberneteses that offer routable loadbalancers from the host.
 
+## Install
+
+Homebrew (macos/linux):
+
+```bash
+brew install mkmik/lokus/lokus
+```
+
+Anywhere else, from sources:
+
+```bash
+go install mkm.pub/lokus@latest
+```
+
 ## Demo
 
 Scenario: you have a few Ingress instances, possibly with different hostnames, all in the `.local` domain.
