@@ -153,7 +153,8 @@ func advertiseMacHack(names []string, ip string) error {
 			return cmd.Run()
 		})
 	}
-	log.Println("Running dns-sd subprocesses instead of mDNS server as a workaround for Tailscale split DNS issue")
+	log.Printf("Serving %q -> %s using `dns-sd`", names, ip)
+	log.Printf("(Running dns-sd instead of mDNS as a workaround for Tailscale split DNS issue)")
 	if err := g.Wait(); err != nil {
 		return err
 	}
@@ -175,6 +176,8 @@ func getVersion() string {
 func main() {
 	var cli CLI
 	ctx := kong.Parse(&cli,
+		kong.Description(`For each Ingress resource in your local k3d cluster that uses a ".local" domain name, 
+lokus creates a DNS record pointing to the internal load balancer IP. It uses unprivileged mDNS so you don't have to edit /etc/hosts`),
 		kong.UsageOnError(),
 		kong.Vars{
 			"version": getVersion(),
