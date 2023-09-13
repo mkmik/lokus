@@ -6,12 +6,15 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/alecthomas/kong"
 	"github.com/pion/mdns"
 	"golang.org/x/net/ipv4"
+	"golang.org/x/sync/errgroup"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -106,6 +109,10 @@ func advertise(ingresses []networkingv1.Ingress) error {
 	}
 	names = deduplicate(names)
 
+	if runtime.GOOS == "darwin" {
+		return advertiseMacHack(names, ip)
+	}
+
 	addr, err := net.ResolveUDPAddr("udp4", mdns.DefaultAddress)
 	// addr, err := net.ResolveUDPAddr("udp6", "[ff02::0]:5353")
 
@@ -127,6 +134,26 @@ func advertise(ingresses []networkingv1.Ingress) error {
 	}
 	log.Printf("Serving %q -> %s over mDNS listening on %s", names, ip, addr)
 	select {}
+}
+
+func advertiseMacHack(names []string, ip string) error {
+	g, _ := errgroup.WithContext(context.Background())
+
+	for _, name := range names {
+		name := name
+		_ = name
+		g.Go(func() error {
+			cmd := exec.Command("dns-sd", "-P", name, "_http", "local", "80", name, ip)
+			return cmd.Run()
+		})
+	}
+	log.Println("Running dns-sd subprocesses instead of mDNS server as a workaround for Tailscale split DNS issue")
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	log.Println("Should not end successfully")
+	return nil
 }
 
 func main() {
