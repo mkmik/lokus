@@ -94,11 +94,12 @@ func deduplicate(data []string) []string {
 	return result
 }
 
-func advertise(ingresses []networkingv1.Ingress) error {
+func generateHosts(ingresses []networkingv1.Ingress) (hosts []string, loadBalancerIP string, err error) {
 	var (
 		ip    string
 		names []string
 	)
+
 	for _, ingress := range ingresses {
 		for _, rule := range ingress.Spec.Rules {
 			if strings.HasSuffix(rule.Host, ".local") {
@@ -106,12 +107,30 @@ func advertise(ingresses []networkingv1.Ingress) error {
 			}
 		}
 		for _, lb := range ingress.Status.LoadBalancer.Ingress {
-			if ip == "" {
-				ip = lb.IP
-			} else if ip != lb.IP {
-				return fmt.Errorf("lokus works only if all matching ingresses use the same loadbalancer")
+
+			// Address has previously been set when there are multiple LB IPs,
+			// this is okay to proceed.
+			if ip == lb.IP {
+				continue
+			}
+
+			if ip != lb.IP {
+				if ip == "" {
+					ip = lb.IP
+				}
+			} else {
+				return nil, "", fmt.Errorf("lokus works only if all matching ingresses use the same loadbalancer")
 			}
 		}
+	}
+
+	return names, ip, nil
+}
+
+func advertise(ingresses []networkingv1.Ingress) error {
+	names, ip, err := generateHosts(ingresses)
+	if err != nil {
+		return err
 	}
 	names = deduplicate(names)
 
