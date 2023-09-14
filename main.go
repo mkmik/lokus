@@ -94,7 +94,7 @@ func deduplicate(data []string) []string {
 	return result
 }
 
-func generateHosts(ingresses []networkingv1.Ingress) ([]string, string, error) {
+func generateHosts(ingresses []networkingv1.Ingress) (hosts []string, loadBalancerIP string, err error) {
 	var (
 		ip    string
 		names []string
