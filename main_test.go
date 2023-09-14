@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	networkingv1 "k8s.io/api/networking/v1"
