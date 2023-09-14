@@ -106,9 +106,17 @@ func advertise(ingresses []networkingv1.Ingress) error {
 			}
 		}
 		for _, lb := range ingress.Status.LoadBalancer.Ingress {
-			if ip == "" {
-				ip = lb.IP
-			} else if ip != lb.IP {
+
+			if ip == lb.IP {
+				continue
+			}
+
+			if ip != lb.IP {
+				if ip == "" {
+					ip = lb.IP
+				}
+
+			} else {
 				return fmt.Errorf("lokus works only if all matching ingresses use the same loadbalancer")
 			}
 		}
