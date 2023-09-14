@@ -43,7 +43,6 @@ func TestMultipleLoadBalancerIPs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error, got %+v", err)
 	}
-	fmt.Println(names, ip)
 	expectedNames := []string{"fake.local"}
 	expectedIp := "192.168.48.4" // The first address we find
 
