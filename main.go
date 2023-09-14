@@ -94,11 +94,12 @@ func deduplicate(data []string) []string {
 	return result
 }
 
-func advertise(ingresses []networkingv1.Ingress) error {
+func generateHosts(ingresses []networkingv1.Ingress) ([]string, string, error) {
 	var (
 		ip    string
 		names []string
 	)
+
 	for _, ingress := range ingresses {
 		for _, rule := range ingress.Spec.Rules {
 			if strings.HasSuffix(rule.Host, ".local") {
@@ -118,9 +119,18 @@ func advertise(ingresses []networkingv1.Ingress) error {
 					ip = lb.IP
 				}
 			} else {
-				return fmt.Errorf("lokus works only if all matching ingresses use the same loadbalancer")
+				return nil, "", fmt.Errorf("lokus works only if all matching ingresses use the same loadbalancer")
 			}
 		}
+	}
+
+	return names, ip, nil
+}
+
+func advertise(ingresses []networkingv1.Ingress) error {
+	names, ip, err := generateHosts(ingresses)
+	if err != nil {
+		return err
 	}
 	names = deduplicate(names)
 
