@@ -107,6 +107,8 @@ func advertise(ingresses []networkingv1.Ingress) error {
 		}
 		for _, lb := range ingress.Status.LoadBalancer.Ingress {
 
+			// Address has previously been set when there are multiple LB IPs,
+			// this is okay to proceed.
 			if ip == lb.IP {
 				continue
 			}
