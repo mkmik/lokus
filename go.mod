@@ -3,7 +3,7 @@ module mkm.pub/lokus
 go 1.21.0
 
 require (
-	github.com/alecthomas/kong v0.8.0
+	github.com/alecthomas/kong v0.8.1
 	github.com/pion/mdns v0.0.9
 	golang.org/x/net v0.16.0
 	golang.org/x/sync v0.3.0
