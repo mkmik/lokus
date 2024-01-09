@@ -5,7 +5,7 @@ go 1.21.6
 require (
 	github.com/alecthomas/kong v0.8.1
 	github.com/pion/mdns v0.0.9
-	golang.org/x/net v0.17.0
+	golang.org/x/net v0.20.0
 	golang.org/x/sync v0.3.0
 	k8s.io/api v0.28.4
 	k8s.io/apimachinery v0.28.4
@@ -36,9 +36,9 @@ require (
 	github.com/pion/logging v0.2.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/term v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/term v0.16.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
