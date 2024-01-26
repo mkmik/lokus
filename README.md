@@ -4,6 +4,8 @@ Export .local ingress hostnames via mDNS
 
 Designed to be used with https://k3d.io/v5.6.0/ or other local kuberneteses that offer routable loadbalancers from the host.
 
+Turns out it also works with GKE and its default ingress controller!
+
 ## Install
 
 Homebrew (macos/linux):

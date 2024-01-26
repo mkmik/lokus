@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
+	"sort"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -79,7 +80,7 @@ func (cmd *CLI) Run(cli *Context) error {
 		return err
 	}
 
-	return advertise(ingresses.Items)
+	return advertiseAll(ingresses.Items)
 }
 
 func deduplicate(data []string) []string {
@@ -91,49 +92,73 @@ func deduplicate(data []string) []string {
 	for item := range m {
 		result = append(result, item)
 	}
+	sort.Strings(result)
 	return result
 }
 
-func generateHosts(ingresses []networkingv1.Ingress) (hosts []string, loadBalancerIP string, err error) {
-	var (
-		ip    string
-		names []string
-	)
+type hostMap struct {
+	names []string
+	ip    string
+}
+
+// groups ingresses so that we end up with a list of mappings where each mapping is
+// a list of hostnames that use the same load balancer IP address.
+// The results are sorted.
+func generateHosts(ingresses []networkingv1.Ingress) (hosts []hostMap, err error) {
+	ipToNames := map[string][]string{}
+	nameToIP := map[string]string{} // conflict check
 
 	for _, ingress := range ingresses {
+		var names []string
 		for _, rule := range ingress.Spec.Rules {
 			if strings.HasSuffix(rule.Host, ".local") {
 				names = append(names, rule.Host)
 			}
 		}
+		if len(names) == 0 {
+			continue
+		}
+
 		for _, lb := range ingress.Status.LoadBalancer.Ingress {
-
-			// Address has previously been set when there are multiple LB IPs,
-			// this is okay to proceed.
-			if ip == lb.IP {
-				continue
-			}
-
-			if ip != lb.IP {
-				if ip == "" {
-					ip = lb.IP
+			if ip := lb.IP; ip != "" {
+				ipToNames[ip] = append(ipToNames[ip], names...)
+				for _, name := range names {
+					if oldIP := nameToIP[name]; oldIP != "" && oldIP != ip {
+						return nil, fmt.Errorf("conflicting NAME: %q in map: %q", name, nameToIP)
+					}
+					nameToIP[name] = ip
 				}
-			} else {
-				return nil, "", fmt.Errorf("lokus works only if all matching ingresses use the same loadbalancer")
+				break // only the first IP
 			}
 		}
 	}
 
-	return names, ip, nil
+	for ip, names := range ipToNames {
+		hosts = append(hosts, hostMap{names: deduplicate(names), ip: ip})
+	}
+	sort.Slice(hosts, func(i, j int) bool { return hosts[i].ip < hosts[j].ip })
+
+	return hosts, nil
 }
 
-func advertise(ingresses []networkingv1.Ingress) error {
-	names, ip, err := generateHosts(ingresses)
+func advertiseAll(ingresses []networkingv1.Ingress) error {
+	if runtime.GOOS == "darwin" {
+		log.Printf("(Running dns-sd instead of mDNS as a workaround for Tailscale split DNS issue)")
+	}
+
+	hosts, err := generateHosts(ingresses)
 	if err != nil {
 		return err
 	}
-	names = deduplicate(names)
 
+	for _, h := range hosts {
+		go advertiseOne(h.names, h.ip)
+	}
+
+	select {}
+}
+
+func advertiseOne(names []string, ip string) error {
 	if runtime.GOOS == "darwin" {
 		return advertiseMacHack(names, ip)
 	}
@@ -173,7 +198,6 @@ func advertiseMacHack(names []string, ip string) error {
 		})
 	}
 	log.Printf("Serving %q -> %s using `dns-sd`", names, ip)
-	log.Printf("(Running dns-sd instead of mDNS as a workaround for Tailscale split DNS issue)")
 	if err := g.Wait(); err != nil {
 		return err
 	}
