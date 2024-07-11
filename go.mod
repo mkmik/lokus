@@ -10,7 +10,7 @@ require (
 	k8s.io/api v0.29.4
 	k8s.io/apimachinery v0.29.4
 	k8s.io/client-go v0.29.4
-	k8s.io/utils v0.0.0-20240710235135-d4aae2beeffc
+	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 )
 
 require (
