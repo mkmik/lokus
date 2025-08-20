@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/kong v0.8.1
 	github.com/pion/mdns v0.0.12
 	golang.org/x/net v0.23.0
-	golang.org/x/sync v0.6.0
+	golang.org/x/sync v0.16.0
 	k8s.io/api v0.29.4
 	k8s.io/apimachinery v0.29.4
 	k8s.io/client-go v0.29.4
