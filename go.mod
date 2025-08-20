@@ -5,6 +5,7 @@ go 1.21.7
 require (
 	github.com/alecthomas/kong v0.8.1
 	github.com/pion/mdns v0.0.12
+	github.com/pion/mdns/v2 v2.0.7
 	golang.org/x/net v0.23.0
 	golang.org/x/sync v0.6.0
 	k8s.io/api v0.29.4
