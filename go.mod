@@ -7,9 +7,9 @@ require (
 	github.com/pion/mdns v0.0.12
 	golang.org/x/net v0.23.0
 	golang.org/x/sync v0.6.0
-	k8s.io/api v0.29.4
-	k8s.io/apimachinery v0.29.4
-	k8s.io/client-go v0.29.4
+	k8s.io/api v0.34.0
+	k8s.io/apimachinery v0.34.0
+	k8s.io/client-go v0.34.0
 	k8s.io/utils v0.0.0-20250820121507-0af2bda4dd1d
 )
 
