@@ -1,6 +1,8 @@
 module mkm.pub/lokus
 
-go 1.21.7
+go 1.23
+
+toolchain go1.24.12
 
 require (
 	github.com/alecthomas/kong v0.8.1
@@ -10,7 +12,7 @@ require (
 	k8s.io/api v0.29.4
 	k8s.io/apimachinery v0.29.4
 	k8s.io/client-go v0.29.4
-	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
+	k8s.io/utils v0.0.0-20260108192941-914a6e750570
 )
 
 require (
