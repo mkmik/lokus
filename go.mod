@@ -1,8 +1,8 @@
 module mkm.pub/lokus
 
-go 1.23
+go 1.26
 
-toolchain go1.24.12
+toolchain go1.26.0
 
 require (
 	github.com/alecthomas/kong v0.8.1
