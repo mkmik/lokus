@@ -190,8 +190,6 @@ func advertiseMacHack(names []string, ip string) error {
 	g, _ := errgroup.WithContext(context.Background())
 
 	for _, name := range names {
-		name := name
-		_ = name
 		g.Go(func() error {
 			cmd := exec.Command("dns-sd", "-P", name, "_http", "local", "80", name, ip)
 			return cmd.Run()
