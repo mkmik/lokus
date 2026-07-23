@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.5
 
 require (
-	github.com/alecthomas/kong v0.8.1
+	github.com/alecthomas/kong v0.9.0
 	github.com/pion/mdns v0.0.12
 	golang.org/x/net v0.49.0
 	golang.org/x/sync v0.19.0
